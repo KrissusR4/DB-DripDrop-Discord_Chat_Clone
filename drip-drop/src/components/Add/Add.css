@@ -1,0 +1,31 @@
+.add{
+    margin: auto;
+    align-items: center;
+    text-align: center;
+   
+}
+.add-con{
+    height: 0;
+    overflow: hidden;
+}
+.add-con.open{
+    height: 50px;
+    transition: height 0.3s ease-out;
+}
+
+.add>p{
+    font-size: 36px;
+    font-style: oblique;
+    color: rgb(0, 0, 43);
+}
+
+.add>input{
+    border-radius: 3px ;
+    padding-left: 5px;
+    width:150px;
+}
+
+.add>button{
+    width: 30px;
+    margin-left: 5px;
+}

@@ -1,0 +1,28 @@
+.input-style{
+    display: flex;
+    flex-direction: column;
+    max-width: 270px;
+    margin: 15px auto;
+}
+
+.input-style p{
+    margin: 7px 20px;
+    font-size: 20px;
+    font: oblique;
+    color: antiquewhite;
+}
+
+.input-style input{
+    height: 35px;
+    max-width: 250px;
+    font-size: 20px;
+    margin: 5px 10px;
+    border-radius: 5px;
+}
+
+.input-style .line {
+    height: 2px;
+    width: 100%;
+    background: #ccc;
+    margin: 5px auto;
+}

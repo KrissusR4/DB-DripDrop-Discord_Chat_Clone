@@ -1,0 +1,174 @@
+0. CQL Create Keyspace ( use same one )
+
+CREATE KEYSPACE DripDrop
+WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};
+
+USE DripDrop
+
+1. CQL Create Tables
+
+CREATE TABLE User (
+	userUID uuid,
+	username text,
+	nickname text,
+	password text,
+	serverUIDsList list<text>,
+	friendUIDsList list<text>,
+	PRIMARY KEY (userUID)
+)
+WITH
+  bloom_filter_fp_chance=0.01
+  AND compaction={ 'class' : 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy' }
+  AND compression={ 'sstable_compression' : 'org.apache.cassandra.io.compress.LZ4Compressor' };
+
+CREATE TABLE Server (
+	serverUID uuid,
+	name text,
+	password text,
+	userUIDsList list<text>,
+	adminUIDsList list<text>,
+	chatUIDsList list<text>,
+	privateS boolean,
+	creationTime timeuuid,
+	PRIMARY KEY (serverUID)
+)
+WITH
+  bloom_filter_fp_chance=0.01
+  AND compaction={ 'class' : 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy' }
+  AND compression={ 'sstable_compression' : 'org.apache.cassandra.io.compress.LZ4Compressor' };
+
+CREATE TABLE Chat (
+	chatUID uuid,
+	name text,
+	userUIDsList list<text>,
+	creationTime timestamp,
+	serverUID uuid,
+	PRIMARY KEY (chatUID)
+)
+WITH
+  bloom_filter_fp_chance=0.01
+  AND compaction={ 'class' : 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy' }
+  AND compression={ 'sstable_compression' : 'org.apache.cassandra.io.compress.LZ4Compressor' };
+
+CREATE TABLE Message (
+	messageUID uuid,
+	fromWho text,
+	timeSent timestamp,
+	text text,
+	picture text,
+	chatUID text,
+	PRIMARY KEY ((messageUID), timeSent)
+)
+WITH
+  bloom_filter_fp_chance=0.01
+  AND compaction={ 'class' : 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy' }
+  AND compression={ 'sstable_compression' : 'org.apache.cassandra.io.compress.LZ4Compressor' }
+  AND CLUSTERING ORDER BY (timeSent DESC);
+
+2. CQL Insert Start Data
+
+User:
+
+INSERT INTO User (userUID, username, nickname, password, serverUIDsList, friendUIDsList) values (uuid(), 'Kristijan', 'Kris', 'kilic', [], []);
+INSERT INTO User (userUID, username, nickname, password, serverUIDsList, friendUIDsList) values (uuid(), 'Milos', 'Miske', 'mstoiljkovic', [], []);
+INSERT INTO User (userUID, username, nickname, password, serverUIDsList, friendUIDsList) values (uuid(), 'Julija', 'Jucili', 'jpancic', [af3270f0-8ce7-46d7-bfcf-092b71f05bd7], []);
+
+Server:
+
+INSERT INTO Server (serverUID, name, password, userUIDsList, adminUIDsList, chatUIDsList, privateS, creationTime) values (uuid(), 'server1', 's1s1', [], [], [], false, now());
+INSERT INTO Server (serverUID, name, password, userUIDsList, adminUIDsList, chatUIDsList, privateS, creationTime) values (uuid(), 'server2', 's2s2', [], [], [], true, now());
+INSERT INTO Server (serverUID, name, password, userUIDsList, adminUIDsList, chatUIDsList, privateS, creationTime) values (uuid(), 'server3', 's3s3', [], [], [], false, now());
+
+Chat:
+
+INSERT INTO Chat (chatUID, name, userUIDsList, creationTime, serverUID) values (uuid(), 'chat1', [], now(), '');
+INSERT INTO Chat (chatUID, name, userUIDsList, creationTime, serverUID) values (uuid(), 'chat2', [], now(), '');
+INSERT INTO Chat (chatUID, name, userUIDsList, creationTime, serverUID) values (uuid(), 'chat3', [], now(), '');
+INSERT INTO Chat (chatUID, name, userUIDsList, creationTime, serverUID) values (uuid(), 'chat4', [], now(), '');
+INSERT INTO Chat (chatUID, name, userUIDsList, creationTime, serverUID) values (uuid(), 'chat5', [], now(), '');
+INSERT INTO Chat (chatUID, name, userUIDsList, creationTime, serverUID) values (uuid(), 'chat6', [], now(), '');
+
+Message:
+
+INSERT INTO Message (messageUID, fromWho, timeSent,texts, picture, chatUID) values (uuid(), 'Kris', dateof(now()), 'Poz', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Miske', dateof(now()), 'Zdravo', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', dateof(now()), 'Sta ima', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Miske', now(), 'Eo nista', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(), 'Ce radimo projekat?', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Miske', now(), 'Ofc bate', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(), 'Kada?', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Miske', now(),  'Sad cu dodjem', '', '1');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(),  'Ej', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Jucili', now(),  'Ejj', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(),  'Kako si?', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Jucili', now(),  'Eo odlicno, ti?', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(),  'Same here!', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Jucili', now(), 'Ocemo raditi kasandritu?', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(),  'Mogli bi', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Jucili', now(),  'Krecemo onda', '', '2');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(),  'Drugarii', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Miske', now(),  'Sta jeeee', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Jucili', now(),  'Nistaaa', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(),  'Unosimooo', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Miske', now(),  'Podaciii', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Jucili', now(),  'Jakaaa pricaaa', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Kris', now(),  'Ludnicaaa', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Miske', now(), 'Kasandritaaaaa', '', '4');
+INSERT INTO Message (messageUID, fromWho, timeSent, texts, picture, chatUID) values (uuid(), 'Jucili', now(), 'oj kassooo', '', '4');
+
+3. Data Provider Functions
+
+User:
+GetUsers()
+GetUserUIDByUsername(string username)
+GetUserByID(string userUID)
+GetUserByUsernameAndPassword(string username, string password)
+AddUser(string username, string nickname, string password)
+AddUserAvatar(string userUID, string avatar)
+AddUserServerUID(string userUID, string serverUID)
+AddUserFriendUID(string userUID, string friendUID)
+DeleteUserByUsername(string username)
+DeleteUserByUID(string userUID)
+
+Server:
+GetServers()
+GetServerUIDByName(string name)
+GetServerByID(string serverUID)
+AddServer(string name, string password, bool privateS)
+AddServerUserUID(string serverUID, string userUID)
+AddServerAdminUID(string serverUID, string adminUID)
+AddServerChatUID(string serverUID, string chatUID)
+AddServerPrivate(string serverUID, bool privateS)
+DeleteServerByName(string name)
+DeleteServerByUID(string serverUID)
+
+Chat:
+GetChats()
+GetChatsByServerUID(string serverUID)
+GetChatUIDByName(string name)
+GetChatByID(string chatUID)
+AddChat(string name, string serverUID)
+AddChatUserUID(string chatUID, string userUID)
+DeleteChatByName(string name)
+DeleteChatByUID(string chatUID)
+
+Message:
+GetMessages()
+GetMessagesByChatUID(string chatUID)
+GetMessageUIDByName(string from, string chatUID)
+GetMessageByID(string messageUID)
+AddMessage(string from, string text, string picture, string chatUID)
+DeleteMessageByUID(string messageUID)
+
+4. Api Functions
+
+User:
+
+
+Server:
+
+
+Chat:
+
+
+Message:
